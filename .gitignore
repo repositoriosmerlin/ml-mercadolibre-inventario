@@ -1,0 +1,37 @@
+*.log
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.codex
+/.cursor/
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/fonts-manifest.dev.json
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+_ide_helper.php
+Homestead.json
+Homestead.yaml
+Thumbs.db
+
+# cambio --- 10/09/2026: .claude/ es configuracion personal del entorno de trabajo
+# (settings + skills), no forma parte del entregable del proyecto
+/.claude
+
+# cambio --- 10/09/2026: instrucciones internas de agentes y plantilla de entorno
+# fuera del repo publico por decision del equipo
+/CLAUDE.md
+/AGENTS.md
+/.env.example

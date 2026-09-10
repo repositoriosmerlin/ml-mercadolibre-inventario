@@ -1,0 +1,174 @@
+/* =========================================================
+   PUENTE ADMINLTE 4 -> AUTO ANIMATOR
+   AdminLTE aporta el esqueleto (sidebar, navbar, wrapper).
+   Este archivo lo alinea con la paleta y la tipografia del
+   sistema de diseno del proyecto.
+
+   Orden de carga: adminlte.min.css -> tokens.css ->
+   components.css -> este archivo.
+   ========================================================= */
+
+/* ---------- BOOTSTRAP 5 CON LA PALETA DEL SISTEMA ---------- */
+:root {
+  --bs-body-font-family: var(--font-sans);
+  --bs-body-color: var(--ink);
+  --bs-border-color: var(--line);
+  --bs-primary: var(--ink);
+  --bs-link-color: var(--ink);
+  --bs-link-hover-color: var(--ink-soft);
+
+  /* Bootstrap exige el canal RGB suelto y no admite var() aqui.
+     Estos valores son los mismos tokens: --ink y --yellow. */
+  --bs-primary-rgb: 10, 10, 10;
+  --bs-link-color-rgb: 10, 10, 10;
+  --bs-focus-ring-color: rgba(10, 10, 10, .10);
+}
+
+/* El blanco es el color predominante del sistema (65% de la superficie).
+   El panel entero va en blanco y la separacion entre bloques la dan los
+   bordes --line, no un fondo gris. */
+body,
+.app-wrapper,
+.app-main,
+.app-content {
+  background: var(--white);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+}
+
+/* Red de seguridad: si algo llegara a declarar el modo oscuro de
+   Bootstrap, el panel no debe cambiar de color. */
+[data-bs-theme="dark"] body,
+[data-bs-theme="dark"] .app-wrapper,
+[data-bs-theme="dark"] .app-main,
+[data-bs-theme="dark"] .app-content {
+  background: var(--white);
+  color: var(--ink);
+}
+
+/* ---------- SIDEBAR ---------- */
+/* El aside ya no trae .bg-body-secondary (se quito en classes_sidebar),
+   asi que basta con declarar el color aqui. */
+.app-sidebar {
+  background-color: var(--ink);
+  border-right: 0;
+}
+
+.app-sidebar .brand-link {
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+  color: var(--white);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+}
+
+.app-sidebar .brand-image {
+  border-radius: 6px;
+  opacity: 1;
+}
+
+.app-sidebar .nav-header {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .38);
+  padding: 20px 16px 8px;
+}
+
+.app-sidebar .sidebar-menu .nav-link {
+  color: rgba(255, 255, 255, .72);
+  border-radius: var(--r-md);
+  margin: 2px 8px;
+  font-size: var(--fs-sm);
+  transition: background var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out);
+}
+
+.app-sidebar .sidebar-menu .nav-link:hover {
+  background: rgba(255, 255, 255, .06);
+  color: var(--white);
+}
+
+/* Marcador de posicion actual: amarillo como senal, no como fondo. */
+.app-sidebar .sidebar-menu .nav-link.active {
+  background: rgba(255, 255, 255, .10);
+  color: var(--white);
+  box-shadow: inset 3px 0 0 var(--yellow);
+}
+
+.app-sidebar .sidebar-menu .nav-treeview .nav-link {
+  font-size: 13px;
+  padding-left: 32px;
+}
+/* Cuando el padre esta desplegado, el marcador amarillo se reserva para el
+   item final: dos senales para un mismo lugar solo hacen ruido. El padre
+   se distingue igual por el texto en blanco. */
+.app-sidebar .sidebar-menu > .nav-item.menu-open > .nav-link.active {
+  background: transparent;
+  box-shadow: none;
+  color: var(--white);
+}
+
+
+/* ---------- NAVBAR ---------- */
+.app-header {
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+}
+
+.app-header .nav-link {
+  color: var(--ink-soft);
+}
+
+.app-header .nav-link:hover {
+  color: var(--ink);
+}
+
+/* ---------- CONTENIDO ---------- */
+.app-content {
+  padding-top: 24px;
+  padding-bottom: 48px;
+}
+
+/* El estandar fija el h1 de seccion en 28-36px; el token fs-2xl
+   (44px) es para landings, no para una pantalla de panel. */
+.app-content .aa-h1 {
+  font-size: 30px;
+  margin: 6px 0 12px;
+}
+
+.app-content .aa-lead {
+  font-size: var(--fs-base);
+  margin: 0;
+}
+
+/* ---------- COMPONENTES BOOTSTRAP QUE ADMINLTE USA ---------- */
+.btn-primary {
+  --bs-btn-bg: var(--ink);
+  --bs-btn-border-color: var(--ink);
+  --bs-btn-hover-bg: #2a2a2a;
+  --bs-btn-hover-border-color: #2a2a2a;
+  --bs-btn-active-bg: var(--black);
+  --bs-btn-active-border-color: var(--black);
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-1);
+}
+
+.dropdown-menu {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-2);
+  font-size: var(--fs-sm);
+}
+
+/* La tabla del sistema no debe heredar el borde de .table */
+.aa-table-wrap .aa-table {
+  margin: 0;
+}

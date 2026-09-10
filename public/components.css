@@ -1,0 +1,279 @@
+/* =========================================================
+   AUTO ANIMATOR — COMPONENTES DE APLICACIÓN
+   Complementa tokens.css. No define colores propios:
+   todo sale de las variables del sistema.
+   ========================================================= */
+
+.aa-scope { font-family: var(--font-sans); color: var(--ink); }
+
+/* ---------- MENÚ DESPLEGABLE DE NAVEGACIÓN ---------- */
+.aa-menu { position: relative; }
+.aa-menu > summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  border-radius: var(--r-md);
+  transition: background var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out);
+}
+.aa-menu > summary::-webkit-details-marker { display: none; }
+.aa-menu > summary:hover { background: var(--mist); color: var(--ink); }
+.aa-menu[open] > summary,
+.aa-menu > summary.active { background: var(--ink); color: var(--white); }
+.aa-menu > summary .caret { font-size: 9px; opacity: .7; }
+
+.aa-menu-list {
+  position: absolute; top: calc(100% + 8px); left: 0; z-index: 20;
+  min-width: 208px;
+  padding: 6px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-2);
+  animation: aa-menu-in var(--dur-2) var(--ease-out) both;
+}
+.aa-menu-list a { display: block; padding: 8px 10px; font-size: 13px; }
+.aa-menu-list .label {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: var(--tracking-wide); text-transform: uppercase;
+  color: var(--muted);
+  padding: 6px 10px 4px;
+}
+
+@keyframes aa-menu-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aa-menu-list { animation: none; }
+}
+
+/* ---------- BOTONES ---------- */
+.aa-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 18px;
+  background: var(--white);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px; font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .15s ease, border-color .15s ease, background .15s ease, color .15s ease;
+}
+.aa-btn:hover { border-color: var(--ink); transform: translateY(-1px); }
+.aa-btn.primary { background: var(--yellow); border-color: var(--yellow); color: var(--ink); }
+.aa-btn.primary:hover { background: #e0b300; border-color: #e0b300; }
+.aa-btn.success { background: var(--ink); border-color: var(--ink); color: var(--white); }
+.aa-btn.success:hover { background: #2a2a2a; border-color: #2a2a2a; }
+.aa-btn.danger { border-color: var(--red); color: var(--red); }
+.aa-btn.danger:hover { background: var(--red); color: var(--white); }
+.aa-btn.ghost { border-color: var(--line); color: var(--ink-soft); cursor: default; }
+.aa-btn.ghost:hover { transform: none; border-color: var(--line); }
+.aa-btn.sm { padding: 6px 12px; font-size: 12px; }
+.aa-btn.lg { padding: 14px 24px; font-size: 15px; }
+
+/* ---------- TABLA DE REPORTE ---------- */
+.aa-table-wrap {
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--white);
+}
+.aa-table { width: 100%; border-collapse: collapse; }
+.aa-table th {
+  text-align: left;
+  padding: 12px 16px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: var(--tracking-wide); text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.aa-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  color: var(--ink);
+  vertical-align: middle;
+}
+.aa-table tbody tr:last-child td { border-bottom: 0; }
+.aa-table tbody tr:hover { background: var(--paper); }
+.aa-table .col-accion { text-align: right; white-space: nowrap; }
+
+/* ---------- EMPTY STATE ---------- */
+.aa-empty {
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-lg);
+  background: var(--paper);
+  padding: 48px 32px;
+  text-align: center;
+}
+.aa-empty .dot {
+  display: inline-block;
+  width: 10px; height: 10px; margin: 0 3px;
+  border-radius: 3px;
+  background: var(--ink);
+}
+.aa-empty .title { margin-top: 16px; font-size: 18px; font-weight: 600; }
+.aa-empty .sub { margin-top: 4px; font-size: 14px; color: var(--muted); }
+
+/* ---------- SECTION TITLE ---------- */
+.section-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: var(--tracking-wide); text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+/* ---------- FLASH DE SESIÓN ---------- */
+.aa-flash {
+  padding: 12px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--white);
+  font-size: 14px;
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+
+/* ---------- UTILIDADES DE LAYOUT ---------- */
+.aa-head-row {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+/* ---------- FORMULARIOS ---------- */
+.aa-field { margin-bottom: 16px; }
+.aa-label {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: var(--tracking-wide); text-transform: uppercase;
+  color: var(--muted);
+}
+.aa-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--white);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--ink);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.aa-input:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(10,10,10,.06);
+}
+.aa-input.bad {
+  border-color: var(--red);
+  background: var(--red-soft);
+  box-shadow: 0 0 0 3px rgba(225,29,46,.10);
+}
+.aa-input:disabled { background: var(--mist); color: var(--muted); }
+.aa-error { margin-top: 6px; font-size: 12px; color: var(--red); }
+.aa-check {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--ink-soft); cursor: pointer;
+}
+
+/* ---------- PANTALLA DE ACCESO ---------- */
+.aa-auth {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 48px 24px;
+  background:
+    repeating-linear-gradient(135deg, var(--paper) 0 10px, var(--white) 10px 20px);
+}
+.aa-auth-card {
+  width: 100%; max-width: 400px;
+  padding: 32px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-2);
+  animation: aa-auth-in var(--dur-3) var(--ease-out) both;
+}
+@keyframes aa-auth-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aa-auth-card { animation: none; }
+}
+
+/* ---------- BLOQUE DE SESIÓN EN LA NAV ---------- */
+.aa-user {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 13px; color: var(--ink-soft);
+}
+.aa-user .nombre { font-weight: 500; color: var(--ink); }
+
+/* ---------- CASILLAS DE PERMISO ----------
+   cambio --- 10/09/2026: filas del catalogo de permisos en el formulario de
+   rol. La clave va en mono porque es un dato tecnico, y la descripcion
+   debajo en --muted para que la lista se lea de un vistazo. */
+.aa-permiso {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: background var(--dur-2) var(--ease-out);
+}
+.aa-permiso:hover { background: var(--paper); }
+.aa-permiso input { margin-top: 3px; flex: none; }
+.aa-permiso .mono { display: block; font-size: 12.5px; color: var(--ink); }
+.aa-permiso .desc { display: block; font-size: 12px; color: var(--muted); }
+
+/* ---------- BARRA DE ACCIONES DE FORMULARIO ---------- */
+.aa-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-top: 8px;
+}
+
+/* ---------- ALERTAS INLINE ----------
+   cambio --- 10/09/2026: seccion 9 del estandar. */
+.aa-alert {
+  padding: 12px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--white);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+}
+.aa-alert.warn { background: var(--yellow-soft); border-color: #e9c759; color: #7a5a00; }
+.aa-alert.success { background: var(--green-soft); border-color: #a8d9bb; color: #0D6B3F; }
+.aa-alert.error { background: var(--red-soft); border-color: #f1a7af; color: #8a1522; }
+
+/* cambio --- 10/09/2026: ayuda bajo un input. Mas apagada que el label para
+   que no compita con el dato que el usuario esta escribiendo. */
+.aa-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+/* cambio --- 10/09/2026: en la lista de roles del formulario de usuario el
+   nombre es texto normal, no un dato tecnico como la clave de un permiso. */
+.aa-permiso .nombre {
+  display: block;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--ink);
+}

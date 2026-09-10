@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Auto Animator — Animaciones</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../tokens.css">
+<style>
+  .anim-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 28px;
+  }
+  .anim-card {
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    background: var(--white);
+    overflow: hidden;
+  }
+  .anim-card .stage {
+    aspect-ratio: 4/3;
+    background:
+      linear-gradient(#F2F2F2 1px, transparent 1px) 0 0 / 28px 28px,
+      linear-gradient(90deg, #F2F2F2 1px, transparent 1px) 0 0 / 28px 28px,
+      #FFFFFF;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .anim-card .label {
+    padding: 12px 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid var(--line);
+  }
+  .anim-card .label .name { font-weight: 600; font-size: 13px; }
+  .anim-card .label .id { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+
+  /* Shared shapes */
+  .shape {
+    width: 56px; height: 56px; border-radius: 6px;
+    background: var(--ink);
+  }
+  .shape.y { background: var(--yellow); }
+  .shape.r { background: var(--red); }
+  .shape.round { border-radius: 50%; }
+  .shape.outline { background: #fff; border: 1.5px solid var(--ink); }
+
+  /* 01 fade-in */
+  @keyframes fadeIn { 0%,10% { opacity: 0; } 50%,100% { opacity: 1; } }
+  .a-01 { animation: fadeIn 2.4s ease-out infinite; }
+
+  /* 02 slide-up */
+  @keyframes slideUp { 0% { transform: translateY(20px); opacity: 0; } 50%,100% { transform: translateY(0); opacity: 1; } }
+  .a-02 { animation: slideUp 2.4s cubic-bezier(.2,.7,.2,1) infinite; }
+
+  /* 03 scale-in */
+  @keyframes scaleIn { 0% { transform: scale(.6); opacity: 0; } 50%,100% { transform: scale(1); opacity: 1; } }
+  .a-03 { animation: scaleIn 2.4s cubic-bezier(.25,1.2,.35,1) infinite; }
+
+  /* 04 pulse */
+  @keyframes pulseA { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+  .a-04 { animation: pulseA 1.6s ease-in-out infinite; }
+
+  /* 05 rotate */
+  @keyframes rotA { to { transform: rotate(360deg); } }
+  .a-05 { animation: rotA 3s linear infinite; border-radius: 4px; }
+
+  /* 06 float */
+  @keyframes float { 0%,100% { transform: translateY(-10px); } 50% { transform: translateY(10px); } }
+  .a-06 { animation: float 2.4s ease-in-out infinite; border-radius: 50%; }
+
+  /* 07 draw-line */
+  .draw-wrap { position: relative; width: 80%; height: 2px; background: rgba(10,10,10,.1); }
+  .draw-wrap::before {
+    content: ''; position: absolute; left: 0; top: 0; height: 100%;
+    background: var(--ink); animation: draw 2.4s cubic-bezier(.2,.7,.2,1) infinite;
+  }
+  @keyframes draw { 0% { width: 0; } 60%,100% { width: 100%; } }
+
+  /* 08 highlight sweep */
+  .sweep-wrap { position: relative; padding: 4px 10px; font-size: 28px; font-weight: 600; letter-spacing:-0.02em; overflow: hidden; }
+  .sweep-wrap::before {
+    content: ''; position: absolute; inset: 0; background: var(--yellow);
+    transform: scaleX(0); transform-origin: left;
+    animation: sweep 2.4s cubic-bezier(.2,.7,.2,1) infinite;
+    border-radius: 4px; z-index: 0;
+  }
+  .sweep-wrap span { position: relative; z-index: 1; }
+  @keyframes sweep { 0% { transform: scaleX(0); } 55%,100% { transform: scaleX(1); } }
+
+  /* 09 typewriter */
+  .tw {
+    font-family: var(--font-mono); font-size: 14px; color: var(--ink);
+    white-space: nowrap; overflow: hidden;
+    border-right: 2px solid var(--ink);
+    animation: tw 3.2s steps(24, end) infinite, blink .8s step-end infinite;
+  }
+  @keyframes tw { 0% { width: 0; } 70%,100% { width: 19ch; } }
+  @keyframes blink { 50% { border-color: transparent; } }
+
+  /* 10 dash flow on arrow */
+  .arrow-flow { position: relative; width: 80%; display: flex; align-items: center; }
+  .arrow-flow svg { width: 100%; height: 40px; overflow: visible; }
+  .flow-dash {
+    stroke-dasharray: 4 6;
+    animation: dashMove 1.4s linear infinite;
+  }
+  @keyframes dashMove { to { stroke-dashoffset: -20; } }
+
+  /* 11 stagger dots */
+  .stagger { display: flex; gap: 10px; }
+  .stagger i {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--ink); display: inline-block;
+    animation: bob 1.2s ease-in-out infinite;
+  }
+  .stagger i:nth-child(2) { animation-delay: .12s; background: var(--yellow); }
+  .stagger i:nth-child(3) { animation-delay: .24s; }
+  .stagger i:nth-child(4) { animation-delay: .36s; }
+  @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+
+  /* 12 counter */
+  .counter {
+    font-size: 64px; font-weight: 600; letter-spacing: -0.035em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* easings card */
+  .easings {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    margin-top: 24px;
+  }
+  .easing {
+    border: 1px solid var(--line); border-radius: var(--r-md);
+    padding: 18px; background: var(--white);
+  }
+  .easing .name { font-family: var(--font-mono); font-size: 11px; color: var(--ink); letter-spacing: .06em; text-transform: uppercase; }
+  .easing .expr { font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); margin-top: 4px; word-break: break-all; }
+  .easing svg { width: 100%; height: 70px; margin: 10px 0 0; }
+
+  /* Duration dial */
+  .dur-row {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+    margin-top: 24px;
+  }
+  .dur {
+    border: 1px solid var(--line); border-radius: var(--r-md);
+    padding: 16px; text-align: center;
+  }
+  .dur .v { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
+  .dur .k { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; margin-top: 4px; }
+
+  /* Code */
+  .code {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+    white-space: pre;
+    overflow-x: auto;
+    margin-top: 16px;
+  }
+</style>
+</head>
+<body data-screen-label="05 Animaciones">
+
+<nav class="aa-nav">
+  <div class="brand">
+    <div class="dot"></div><div class="dot y"></div><div class="dot r"></div>
+    <span>Auto&nbsp;Animator</span>
+  </div>
+  <div class="spacer"></div>
+  <ul>
+    <li><a href="index.html">Inicio</a></li>
+    <li><a href="colors.html">Colores</a></li>
+    <li><a href="typography.html">Tipografía</a></li>
+    <li><a href="backgrounds.html">Fondos</a></li>
+    <li><a href="arrows.html">Flechas</a></li>
+    <li><a href="animations.html" class="active">Animaciones</a></li>
+    <li><a href="guidelines.html">Buenas prácticas</a></li>
+  </ul>
+</nav>
+
+<div class="aa-shell">
+  <div class="aa-eyebrow">05 / Animaciones</div>
+  <h1 class="aa-h1">Movimiento con intención.</h1>
+  <p class="aa-lead">Doce micro-animaciones con sus curvas y duraciones. El movimiento es una herramienta didáctica: dirige la mirada, separa pasos y sugiere flujo — no decora.</p>
+
+  <h2 class="aa-h2">Curvas (easings)</h2>
+  <div class="easings">
+    <div class="easing">
+      <div class="name">ease-out</div>
+      <div class="expr">cubic-bezier(.2, .7, .2, 1)</div>
+      <svg viewBox="0 0 100 60"><path d="M 0 60 C 20 0, 20 0, 100 0" fill="none" stroke="#0A0A0A" stroke-width="1.5"/></svg>
+    </div>
+    <div class="easing">
+      <div class="name">ease-in</div>
+      <div class="expr">cubic-bezier(.6, 0, .8, .2)</div>
+      <svg viewBox="0 0 100 60"><path d="M 0 60 C 80 60, 80 60, 100 0" fill="none" stroke="#0A0A0A" stroke-width="1.5"/></svg>
+    </div>
+    <div class="easing">
+      <div class="name">ease-inout</div>
+      <div class="expr">cubic-bezier(.6, 0, .2, 1)</div>
+      <svg viewBox="0 0 100 60"><path d="M 0 60 C 60 60, 20 0, 100 0" fill="none" stroke="#0A0A0A" stroke-width="1.5"/></svg>
+    </div>
+    <div class="easing">
+      <div class="name">spring</div>
+      <div class="expr">cubic-bezier(.25, 1.2, .35, 1)</div>
+      <svg viewBox="0 0 100 60"><path d="M 0 60 C 20 60, 30 -20, 100 0" fill="none" stroke="#F5C518" stroke-width="1.5"/></svg>
+    </div>
+  </div>
+
+  <h2 class="aa-h2">Duraciones</h2>
+  <p class="aa-p">Escala de 5 pasos. No improvises.</p>
+  <div class="dur-row">
+    <div class="dur"><div class="v">120</div><div class="k">ms · micro</div></div>
+    <div class="dur"><div class="v">220</div><div class="k">ms · hover</div></div>
+    <div class="dur"><div class="v">380</div><div class="k">ms · base</div></div>
+    <div class="dur"><div class="v">620</div><div class="k">ms · énfasis</div></div>
+    <div class="dur"><div class="v">900</div><div class="k">ms · narrativa</div></div>
+  </div>
+
+  <h2 class="aa-h2">Biblioteca</h2>
+  <div class="anim-grid">
+
+    <div class="anim-card"><div class="stage"><div class="shape a-01"></div></div>
+      <div class="label"><span class="name">Fade in</span><span class="id">AN-01</span></div></div>
+
+    <div class="anim-card"><div class="stage"><div class="shape a-02"></div></div>
+      <div class="label"><span class="name">Slide up</span><span class="id">AN-02</span></div></div>
+
+    <div class="anim-card"><div class="stage"><div class="shape a-03 y"></div></div>
+      <div class="label"><span class="name">Scale in (spring)</span><span class="id">AN-03</span></div></div>
+
+    <div class="anim-card"><div class="stage"><div class="shape a-04 round"></div></div>
+      <div class="label"><span class="name">Pulse</span><span class="id">AN-04</span></div></div>
+
+    <div class="anim-card"><div class="stage"><div class="shape a-05 outline"></div></div>
+      <div class="label"><span class="name">Rotate</span><span class="id">AN-05</span></div></div>
+
+    <div class="anim-card"><div class="stage"><div class="shape a-06 y"></div></div>
+      <div class="label"><span class="name">Float</span><span class="id">AN-06</span></div></div>
+
+    <div class="anim-card"><div class="stage"><div class="draw-wrap"></div></div>
+      <div class="label"><span class="name">Draw line</span><span class="id">AN-07</span></div></div>
+
+    <div class="anim-card"><div class="stage"><div class="sweep-wrap"><span>Highlight</span></div></div>
+      <div class="label"><span class="name">Sweep amarillo</span><span class="id">AN-08</span></div></div>
+
+    <div class="anim-card"><div class="stage"><div class="tw">input → FiLM → output</div></div>
+      <div class="label"><span class="name">Typewriter</span><span class="id">AN-09</span></div></div>
+
+    <div class="anim-card"><div class="stage">
+      <div class="arrow-flow">
+        <svg viewBox="0 0 300 40">
+          <line x1="10" y1="20" x2="290" y2="20" stroke="#0A0A0A" stroke-width="1.5" opacity=".2"/>
+          <line class="flow-dash" x1="10" y1="20" x2="290" y2="20" stroke="#0A0A0A" stroke-width="1.5"/>
+          <polygon points="290,15 298,20 290,25" fill="#0A0A0A"/>
+        </svg>
+      </div>
+    </div>
+      <div class="label"><span class="name">Dash flow</span><span class="id">AN-10</span></div></div>
+
+    <div class="anim-card"><div class="stage"><div class="stagger"><i></i><i></i><i></i><i></i></div></div>
+      <div class="label"><span class="name">Stagger dots</span><span class="id">AN-11</span></div></div>
+
+    <div class="anim-card"><div class="stage"><div class="counter" id="counter">000</div></div>
+      <div class="label"><span class="name">Contador</span><span class="id">AN-12</span></div></div>
+
+  </div>
+
+  <h2 class="aa-h2">Reglas</h2>
+  <ul class="aa-p" style="line-height:1.8;">
+    <li><strong>Duración base 380 ms</strong> para casi todo. Sólo usa 620/900 ms cuando sea narrativo.</li>
+    <li>Las salidas (exit) suelen ser <strong>40–60% más rápidas</strong> que las entradas.</li>
+    <li><strong>No animes más de 3 elementos</strong> en paralelo; usa stagger (delay 80–120 ms).</li>
+    <li>El <strong>amarillo se anima al entrar</strong>; no lo dejes pulsando permanentemente.</li>
+    <li>Respeta <code>prefers-reduced-motion</code>: desactiva translate/scale, conserva opacity.</li>
+  </ul>
+
+  <h2 class="aa-h2">Snippet base</h2>
+  <div class="code">/* Entrada estándar */
+@keyframes enterUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.enter {
+  animation: enterUp 380ms cubic-bezier(.2, .7, .2, 1) both;
+}
+
+/* Respeta reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}</div>
+
+</div>
+
+<script>
+  // Contador AN-12
+  const el = document.getElementById('counter');
+  let n = 0;
+  setInterval(() => {
+    n = (n + 3) % 1000;
+    el.textContent = String(n).padStart(3, '0');
+  }, 60);
+</script>
+</body>
+</html>

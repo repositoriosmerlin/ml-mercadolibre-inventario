@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Auto Animator — Colores</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../tokens.css">
+<style>
+  .swatch-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-top: 28px;
+  }
+  .swatch {
+    display: flex; flex-direction: column;
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    background: var(--white);
+  }
+  .swatch .chip-area {
+    aspect-ratio: 1 / 0.9;
+    position: relative;
+    border-bottom: 1px solid var(--line);
+  }
+  .swatch .meta {
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .swatch .name { font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
+  .swatch .hex { font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); }
+  .swatch .role {
+    margin-top: 6px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+  }
+  .swatch.ink .chip-area { background: #0A0A0A; }
+  .swatch.mist .chip-area { background: #F2F2F2; }
+  .swatch.paper .chip-area { background: #FAFAFA; }
+  .swatch.white .chip-area { background: #FFFFFF; }
+  .swatch.yellow .chip-area { background: #F5C518; }
+  .swatch.red .chip-area { background: #E11D2E; }
+  .swatch.line .chip-area { background: #E6E6E6; }
+  .swatch.muted .chip-area { background: #8A8A8A; }
+
+  /* Tiny corner tick */
+  .swatch .chip-area::before {
+    content: ''; position: absolute; top: 10px; left: 10px;
+    width: 8px; height: 8px;
+    border-top: 1px solid currentColor;
+    border-left: 1px solid currentColor;
+  }
+  .swatch.ink .chip-area { color: rgba(255,255,255,.35); }
+  .swatch.yellow .chip-area, .swatch.red .chip-area { color: rgba(0,0,0,.3); }
+  .swatch.white .chip-area, .swatch.paper .chip-area, .swatch.mist .chip-area, .swatch.line .chip-area { color: rgba(0,0,0,.35); }
+  .swatch.muted .chip-area { color: rgba(255,255,255,.55); }
+
+  /* Ratio bar */
+  .ratio {
+    margin-top: 24px;
+    display: flex;
+    width: 100%;
+    height: 56px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink);
+  }
+  .ratio > div {
+    display: flex; align-items: flex-end; justify-content: flex-start;
+    padding: 6px 10px;
+    letter-spacing: .06em;
+    border-right: 1px solid var(--line);
+  }
+  .ratio > div:last-child { border-right: 0; }
+
+  /* Usage examples */
+  .usage {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .u-card {
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+  .u-card .stage {
+    aspect-ratio: 4/3;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .u-card .caption {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 14px;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: .04em;
+  }
+  .u-card .caption .tag {
+    padding: 2px 8px; border-radius: 4px;
+    background: var(--paper); border: 1px solid var(--line);
+  }
+  .u-card .caption .tag.bad { background: var(--red-soft); color: var(--red); border-color: var(--red-soft); }
+  .u-card .caption .tag.ok { background: var(--yellow-soft); color: #8a6d00; border-color: var(--yellow-soft); }
+
+  /* Do/Don't ring */
+  .ok-ring { border: 2px solid #0a0a0a; }
+  .bad-ring { border: 2px solid var(--red); }
+
+  /* Tokens table */
+  .tokens {
+    width: 100%; border-collapse: collapse;
+    margin-top: 24px;
+    font-size: 13px;
+  }
+  .tokens th, .tokens td {
+    text-align: left;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .tokens th {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .tokens td.mono { font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); }
+  .tokens td .sq {
+    display: inline-block; width: 16px; height: 16px;
+    border-radius: 3px; border: 1px solid var(--line);
+    vertical-align: -3px; margin-right: 10px;
+  }
+</style>
+</head>
+<body data-screen-label="01 Colores">
+
+<nav class="aa-nav">
+  <div class="brand">
+    <div class="dot"></div><div class="dot y"></div><div class="dot r"></div>
+    <span>Auto&nbsp;Animator</span>
+  </div>
+  <div class="spacer"></div>
+  <ul>
+    <li><a href="index.html">Inicio</a></li>
+    <li><a href="colors.html" class="active">Colores</a></li>
+    <li><a href="typography.html">Tipografía</a></li>
+    <li><a href="backgrounds.html">Fondos</a></li>
+    <li><a href="arrows.html">Flechas</a></li>
+    <li><a href="animations.html">Animaciones</a></li>
+    <li><a href="guidelines.html">Buenas prácticas</a></li>
+  </ul>
+</nav>
+
+<div class="aa-shell">
+  <div class="aa-eyebrow">01 / Colores</div>
+  <h1 class="aa-h1">Paleta mínima, acentos escasos.</h1>
+  <p class="aa-lead">Cuatro colores core. El blanco es el lienzo, el negro es la estructura, el amarillo es la señal, y el rojo sólo aparece cuando algo es verdaderamente crítico. Todo lo demás es una variación tonal del gris.</p>
+
+  <!-- Core palette -->
+  <h2 class="aa-h2">Core</h2>
+  <div class="swatch-row">
+    <div class="swatch white">
+      <div class="chip-area"></div>
+      <div class="meta">
+        <span class="name">White</span>
+        <span class="hex">#FFFFFF</span>
+        <span class="role">Lienzo base</span>
+      </div>
+    </div>
+    <div class="swatch ink">
+      <div class="chip-area"></div>
+      <div class="meta">
+        <span class="name">Ink</span>
+        <span class="hex">#0A0A0A</span>
+        <span class="role">Texto · estructura</span>
+      </div>
+    </div>
+    <div class="swatch yellow">
+      <div class="chip-area"></div>
+      <div class="meta">
+        <span class="name">Yellow</span>
+        <span class="hex">#F5C518</span>
+        <span class="role">Acento · señal</span>
+      </div>
+    </div>
+    <div class="swatch red">
+      <div class="chip-area"></div>
+      <div class="meta">
+        <span class="name">Red</span>
+        <span class="hex">#E11D2E</span>
+        <span class="role">Crítico · ≤ 3%</span>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="chip-area" style="background:#0D8A4E; color:rgba(255,255,255,.35);"></div>
+      <div class="meta">
+        <span class="name">Green</span>
+        <span class="hex">#0D8A4E</span>
+        <span class="role">Positivo · completado</span>
+      </div>
+    </div>
+    <div class="swatch muted">
+      <div class="chip-area"></div>
+      <div class="meta">
+        <span class="name">Muted</span>
+        <span class="hex">#8A8A8A</span>
+        <span class="role">Etiquetas · meta</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Neutrals -->
+  <h2 class="aa-h2">Neutrales tonales</h2>
+  <p class="aa-p">Para separar superficies sin introducir nuevos colores. No suban la saturación aquí.</p>
+  <div class="swatch-row">
+    <div class="swatch paper">
+      <div class="chip-area"></div>
+      <div class="meta">
+        <span class="name">Paper</span>
+        <span class="hex">#FAFAFA</span>
+        <span class="role">Superficie secundaria</span>
+      </div>
+    </div>
+    <div class="swatch mist">
+      <div class="chip-area"></div>
+      <div class="meta">
+        <span class="name">Mist</span>
+        <span class="hex">#F2F2F2</span>
+        <span class="role">Hover · bloques</span>
+      </div>
+    </div>
+    <div class="swatch line">
+      <div class="chip-area"></div>
+      <div class="meta">
+        <span class="name">Line</span>
+        <span class="hex">#E6E6E6</span>
+        <span class="role">Bordes 1px</span>
+      </div>
+    </div>
+    <div class="swatch" style="background: #FFF6CC;">
+      <div class="chip-area" style="background:#FFF6CC;"></div>
+      <div class="meta">
+        <span class="name">Yellow soft</span>
+        <span class="hex">#FFF6CC</span>
+        <span class="role">Resaltado sutil</span>
+      </div>
+    </div>
+    <div class="swatch" style="background: #FCE4E6;">
+      <div class="chip-area" style="background:#FCE4E6;"></div>
+      <div class="meta">
+        <span class="name">Red soft</span>
+        <span class="hex">#FCE4E6</span>
+        <span class="role">Aviso suave</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ratio -->
+  <h2 class="aa-h2">Proporción recomendada</h2>
+  <p class="aa-p">Una pieza bien balanceada se siente "limpia" porque respeta la distribución del color. Úsala como referencia visual en cada composición.</p>
+  <div class="ratio" aria-label="Proporción de color">
+    <div style="flex: 65; background: #FFFFFF; color: var(--ink);">65% &nbsp; WHITE</div>
+    <div style="flex: 22; background: #F2F2F2;">22% &nbsp; NEUTRALES</div>
+    <div style="flex: 10; background: #0A0A0A; color: #fff;">10% &nbsp; INK</div>
+    <div style="flex: 2.5; background: #F5C518;">2.5% &nbsp; YELLOW</div>
+    <div style="flex: 0.5; background: #E11D2E; color:#fff;">0.5%</div>
+  </div>
+
+  <!-- Usage do/don't -->
+  <h2 class="aa-h2">Uso del amarillo y el rojo</h2>
+  <p class="aa-p">El amarillo resalta una idea, un paso clave, una palabra. El rojo detiene la lectura — sólo para errores, alertas reales o el "no hacer".</p>
+  <div class="usage">
+    <div class="u-card ok-ring">
+      <div class="stage" style="background:#fff;">
+        <div style="font-size:26px; font-weight:600; letter-spacing:-0.02em;">
+          El paso <span style="background:#F5C518; padding:0 6px; border-radius:4px;">clave</span> está aquí.
+        </div>
+      </div>
+      <div class="caption"><span>Amarillo · resaltado de concepto</span><span class="tag ok">OK</span></div>
+    </div>
+
+    <div class="u-card ok-ring">
+      <div class="stage" style="background:#fff; gap:12px; flex-direction:column;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="width:10px; height:10px; border-radius:50%; background:#E11D2E;"></span>
+          <span style="font-family:var(--font-mono); font-size:12px; letter-spacing:.06em; text-transform:uppercase;">Error · Timeout 408</span>
+        </div>
+        <div style="font-size:13px; color:var(--muted); font-family:var(--font-mono);">Conexión perdida · reintentar</div>
+      </div>
+      <div class="caption"><span>Rojo · estado crítico real</span><span class="tag ok">OK</span></div>
+    </div>
+
+    <div class="u-card bad-ring">
+      <div class="stage" style="background:linear-gradient(135deg,#F5C518,#E11D2E);">
+        <div style="color:#fff; font-size:22px; font-weight:700;">Banner decorativo</div>
+      </div>
+      <div class="caption"><span>No uses acentos como fondo pleno</span><span class="tag bad">EVITAR</span></div>
+    </div>
+  </div>
+
+  <!-- Tokens table -->
+  <h2 class="aa-h2">Tokens</h2>
+  <p class="aa-p">Variables CSS listas para copiar. Viven en <code>tokens.css</code>.</p>
+  <table class="tokens">
+    <thead>
+      <tr><th style="width:32%;">Variable</th><th>Valor</th><th>Uso</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="mono">--white</td><td class="mono"><span class="sq" style="background:#FFFFFF"></span>#FFFFFF</td><td>Fondo primario</td></tr>
+      <tr><td class="mono">--paper</td><td class="mono"><span class="sq" style="background:#FAFAFA"></span>#FAFAFA</td><td>Superficie secundaria</td></tr>
+      <tr><td class="mono">--mist</td><td class="mono"><span class="sq" style="background:#F2F2F2"></span>#F2F2F2</td><td>Bloques · hover</td></tr>
+      <tr><td class="mono">--line</td><td class="mono"><span class="sq" style="background:#E6E6E6"></span>#E6E6E6</td><td>Separadores 1px</td></tr>
+      <tr><td class="mono">--muted</td><td class="mono"><span class="sq" style="background:#8A8A8A"></span>#8A8A8A</td><td>Etiquetas, meta</td></tr>
+      <tr><td class="mono">--ink-soft</td><td class="mono"><span class="sq" style="background:#3A3A3A"></span>#3A3A3A</td><td>Texto secundario</td></tr>
+      <tr><td class="mono">--ink</td><td class="mono"><span class="sq" style="background:#0A0A0A"></span>#0A0A0A</td><td>Texto primario</td></tr>
+      <tr><td class="mono">--yellow</td><td class="mono"><span class="sq" style="background:#F5C518"></span>#F5C518</td><td>Acento · resaltado</td></tr>
+      <tr><td class="mono">--yellow-soft</td><td class="mono"><span class="sq" style="background:#FFF6CC"></span>#FFF6CC</td><td>Highlight tenue</td></tr>
+      <tr><td class="mono">--red</td><td class="mono"><span class="sq" style="background:#E11D2E"></span>#E11D2E</td><td>Crítico · error</td></tr>
+      <tr><td class="mono">--red-soft</td><td class="mono"><span class="sq" style="background:#FCE4E6"></span>#FCE4E6</td><td>Aviso suave</td></tr>
+      <tr><td class="mono">--green</td><td class="mono"><span class="sq" style="background:#0D8A4E"></span>#0D8A4E</td><td>Positivo · completado</td></tr>
+      <tr><td class="mono">--green-soft</td><td class="mono"><span class="sq" style="background:#DFF5E8"></span>#DFF5E8</td><td>Éxito suave · tick bg</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

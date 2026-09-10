@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Auto Animator — Flechas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../tokens.css">
+<style>
+  .arr-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 28px;
+  }
+  .arr-card {
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    background: var(--white);
+    overflow: hidden;
+  }
+  .arr-card .stage {
+    aspect-ratio: 16 / 8;
+    padding: 32px;
+    background:
+      linear-gradient(#F2F2F2 1px, transparent 1px) 0 0 / 28px 28px,
+      linear-gradient(90deg, #F2F2F2 1px, transparent 1px) 0 0 / 28px 28px,
+      #FFFFFF;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .arr-card .label {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 18px;
+    border-top: 1px solid var(--line);
+  }
+  .arr-card .label .name { font-weight: 600; font-size: 14px; letter-spacing:-0.01em; }
+  .arr-card .label .id {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: .06em; color: var(--muted); text-transform: uppercase;
+  }
+
+  svg { display: block; overflow: visible; }
+  .node {
+    stroke: #0A0A0A; fill: #fff; stroke-width: 1.2;
+  }
+  .node-y { stroke: #F5C518; fill: #FFF6CC; stroke-width: 1.2; }
+  .node-r { stroke: #E11D2E; fill: #FCE4E6; stroke-width: 1.2; }
+  .node-k { stroke: #0A0A0A; fill: #0A0A0A; }
+
+  .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    fill: #0A0A0A;
+    letter-spacing: .04em;
+  }
+  .lbl-muted { fill: #8A8A8A; }
+  .lbl-white { fill: #fff; }
+
+  /* Animated motion class */
+  .dash-move {
+    stroke-dasharray: 4 6;
+    animation: dashMove 1.6s linear infinite;
+  }
+  @keyframes dashMove {
+    to { stroke-dashoffset: -20; }
+  }
+
+  .pulse {
+    animation: pulse 2.4s ease-in-out infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: .5; transform: scale(1); }
+    50%      { opacity: 1;  transform: scale(1.15); }
+  }
+
+  /* Table */
+  .snippets {
+    width: 100%; border-collapse: collapse; margin-top: 24px; font-size: 13px;
+  }
+  .snippets th, .snippets td {
+    text-align: left; padding: 14px 16px; border-bottom: 1px solid var(--line); vertical-align: top;
+  }
+  .snippets th {
+    font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+    letter-spacing: .08em; text-transform: uppercase; font-weight: 500;
+  }
+  .snippets code {
+    font-family: var(--font-mono); font-size: 11.5px;
+    background: var(--paper); padding: 2px 6px; border-radius: 4px;
+    border: 1px solid var(--line);
+  }
+</style>
+
+<!-- Reusable arrowhead marker -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <marker id="ah-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#0A0A0A"/>
+    </marker>
+    <marker id="ah-y" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#F5C518"/>
+    </marker>
+    <marker id="ah-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#E11D2E"/>
+    </marker>
+    <marker id="ah-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8A8A8A"/>
+    </marker>
+    <marker id="dot-ink" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6">
+      <circle cx="5" cy="5" r="3.5" fill="#0A0A0A"/>
+    </marker>
+  </defs>
+</svg>
+
+</head>
+<body data-screen-label="04 Flechas">
+
+<nav class="aa-nav">
+  <div class="brand">
+    <div class="dot"></div><div class="dot y"></div><div class="dot r"></div>
+    <span>Auto&nbsp;Animator</span>
+  </div>
+  <div class="spacer"></div>
+  <ul>
+    <li><a href="index.html">Inicio</a></li>
+    <li><a href="colors.html">Colores</a></li>
+    <li><a href="typography.html">Tipografía</a></li>
+    <li><a href="backgrounds.html">Fondos</a></li>
+    <li><a href="arrows.html" class="active">Flechas</a></li>
+    <li><a href="arrows-lab.html">Lab</a></li>
+    <li><a href="animations.html">Animaciones</a></li>
+    <li><a href="guidelines.html">Buenas prácticas</a></li>
+  </ul>
+</nav>
+
+<div class="aa-shell">
+  <div class="aa-eyebrow">04 / Flechas y conectores</div>
+  <h1 class="aa-h1">Vocabulario de flechas.</h1>
+  <p class="aa-lead">Todas las flechas son SVG con un único marker reutilizable. Ocho variantes cubren el 95% de los casos — de la recta simple al flujo multi-nodo animado.</p>
+
+  <div class="arr-grid">
+
+    <!-- 01 Recta -->
+    <div class="arr-card">
+      <div class="stage">
+        <svg viewBox="0 0 420 140" width="100%">
+          <line x1="40" y1="70" x2="380" y2="70" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#ah-ink)"/>
+          <text x="40" y="58" class="lbl">input</text>
+          <text x="380" y="58" text-anchor="end" class="lbl">output</text>
+        </svg>
+      </div>
+      <div class="label"><span class="name">Recta simple</span><span class="id">AR-01</span></div>
+    </div>
+
+    <!-- 02 Con caja intermedia -->
+    <div class="arr-card">
+      <div class="stage">
+        <svg viewBox="0 0 420 140" width="100%">
+          <line x1="40" y1="70" x2="150" y2="70" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#ah-ink)"/>
+          <rect x="160" y="46" width="100" height="48" rx="6" class="node"/>
+          <text x="210" y="74" text-anchor="middle" class="lbl">transform</text>
+          <line x1="270" y1="70" x2="380" y2="70" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#ah-ink)"/>
+        </svg>
+      </div>
+      <div class="label"><span class="name">Con nodo</span><span class="id">AR-02</span></div>
+    </div>
+
+    <!-- 03 Acodada (90º) -->
+    <div class="arr-card">
+      <div class="stage">
+        <svg viewBox="0 0 420 140" width="100%">
+          <path d="M 40 30 L 210 30 L 210 110 L 380 110" fill="none" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#ah-ink)"/>
+          <text x="40" y="20" class="lbl">start</text>
+          <text x="380" y="100" text-anchor="end" class="lbl">end</text>
+        </svg>
+      </div>
+      <div class="label"><span class="name">Acodada 90°</span><span class="id">AR-03</span></div>
+    </div>
+
+    <!-- 04 Curva -->
+    <div class="arr-card">
+      <div class="stage">
+        <svg viewBox="0 0 420 140" width="100%">
+          <path d="M 40 110 C 140 110, 280 30, 380 30" fill="none" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#ah-ink)"/>
+          <text x="40" y="130" class="lbl">A</text>
+          <text x="380" y="20" text-anchor="end" class="lbl">B</text>
+        </svg>
+      </div>
+      <div class="label"><span class="name">Curva bezier</span><span class="id">AR-04</span></div>
+    </div>
+
+    <!-- 05 Bidireccional -->
+    <div class="arr-card">
+      <div class="stage">
+        <svg viewBox="0 0 420 140" width="100%">
+          <line x1="60" y1="70" x2="360" y2="70" stroke="#0A0A0A" stroke-width="1.5"
+                marker-start="url(#ah-ink)" marker-end="url(#ah-ink)"/>
+          <text x="210" y="58" text-anchor="middle" class="lbl lbl-muted">sync</text>
+        </svg>
+      </div>
+      <div class="label"><span class="name">Bidireccional</span><span class="id">AR-05</span></div>
+    </div>
+
+    <!-- 06 Amarilla -->
+    <div class="arr-card">
+      <div class="stage">
+        <svg viewBox="0 0 420 140" width="100%">
+          <line x1="40" y1="70" x2="380" y2="70" stroke="#F5C518" stroke-width="2" marker-end="url(#ah-y)"/>
+          <text x="210" y="58" text-anchor="middle" class="lbl">SEÑAL</text>
+        </svg>
+      </div>
+      <div class="label"><span class="name">Acento — señal</span><span class="id">AR-06</span></div>
+    </div>
+
+    <!-- 07 Roja (error) -->
+    <div class="arr-card">
+      <div class="stage">
+        <svg viewBox="0 0 420 140" width="100%">
+          <line x1="40" y1="70" x2="380" y2="70" stroke="#E11D2E" stroke-width="1.5"
+                stroke-dasharray="6 4" marker-end="url(#ah-r)"/>
+          <text x="210" y="58" text-anchor="middle" class="lbl" fill="#E11D2E">error · drop</text>
+        </svg>
+      </div>
+      <div class="label"><span class="name">Crítica · punteada</span><span class="id">AR-07</span></div>
+    </div>
+
+    <!-- 08 Animada -->
+    <div class="arr-card">
+      <div class="stage">
+        <svg viewBox="0 0 420 140" width="100%">
+          <line x1="40" y1="70" x2="380" y2="70" stroke="#0A0A0A" stroke-width="1.5" opacity=".25"/>
+          <line class="dash-move" x1="40" y1="70" x2="380" y2="70" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#ah-ink)"/>
+          <circle class="pulse" cx="40" cy="70" r="4" fill="#F5C518"/>
+        </svg>
+      </div>
+      <div class="label"><span class="name">Animada (dash + pulse)</span><span class="id">AR-08</span></div>
+    </div>
+
+  </div>
+
+  <!-- Diagram example -->
+  <h2 class="aa-h2">Ejemplo compuesto</h2>
+  <p class="aa-p">Un flujo real — entrada, red, capa condicional, salida — usando sólo piezas del sistema.</p>
+  <div class="arr-card" style="margin-top: 16px;">
+    <div class="stage" style="aspect-ratio: 21/9;">
+      <svg viewBox="0 0 840 360" width="100%">
+        <!-- Generator row -->
+        <rect x="110" y="60" width="140" height="60" rx="6" class="node-y"/>
+        <text x="180" y="94" text-anchor="middle" class="lbl" fill="#6b5200">generator</text>
+
+        <!-- Sub-networks -->
+        <rect x="310" y="210" width="60" height="80" rx="4" class="node"/>
+        <text x="340" y="250" text-anchor="middle" class="lbl lbl-muted" transform="rotate(-90 340 250)">sub-net</text>
+
+        <rect x="390" y="210" width="40" height="80" rx="4" class="node"/>
+        <text x="410" y="250" text-anchor="middle" class="lbl lbl-muted" transform="rotate(-90 410 250)">norm</text>
+
+        <rect x="450" y="210" width="60" height="80" rx="4" class="node-y"/>
+        <text x="480" y="250" text-anchor="middle" class="lbl" fill="#6b5200" transform="rotate(-90 480 250)">FiLM</text>
+
+        <rect x="530" y="210" width="60" height="80" rx="4" class="node"/>
+        <text x="560" y="250" text-anchor="middle" class="lbl lbl-muted" transform="rotate(-90 560 250)">sub-net</text>
+
+        <rect x="610" y="210" width="40" height="80" rx="4" class="node"/>
+        <text x="630" y="250" text-anchor="middle" class="lbl lbl-muted" transform="rotate(-90 630 250)">norm</text>
+
+        <!-- Input / output blocks -->
+        <rect x="70" y="220" width="60" height="60" rx="4" stroke="#0A0A0A" fill="#FAFAFA" stroke-width="1.2"/>
+        <text x="100" y="255" text-anchor="middle" class="lbl">input</text>
+
+        <rect x="720" y="220" width="60" height="60" rx="4" stroke="#0A0A0A" fill="#FAFAFA" stroke-width="1.2"/>
+        <text x="750" y="255" text-anchor="middle" class="lbl">output</text>
+
+        <!-- Horizontal flow -->
+        <line x1="130" y1="250" x2="310" y2="250" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#ah-ink)"/>
+        <line x1="650" y1="250" x2="720" y2="250" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#ah-ink)"/>
+
+        <!-- Generator → FiLM layer (yellow) -->
+        <path d="M 180 120 L 180 170 L 480 170 L 480 210" fill="none" stroke="#F5C518" stroke-width="1.8" marker-end="url(#ah-y)"/>
+        <text x="260" y="160" class="lbl" fill="#6b5200">FiLM params</text>
+
+        <!-- Labels -->
+        <text x="100" y="310" text-anchor="middle" class="lbl lbl-muted">IN</text>
+        <text x="750" y="310" text-anchor="middle" class="lbl lbl-muted">OUT</text>
+        <text x="480" y="320" text-anchor="middle" class="lbl lbl-muted">conditional instance normalization</text>
+      </svg>
+    </div>
+    <div class="label"><span class="name">Diagrama — style transfer</span><span class="id">AR-COMP-01</span></div>
+  </div>
+
+  <!-- Snippet table -->
+  <h2 class="aa-h2">Snippets básicos</h2>
+  <table class="snippets">
+    <thead>
+      <tr><th style="width:16%;">ID</th><th style="width:40%;">SVG</th><th>Cuándo</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="mono">AR-01</td>
+        <td><code>&lt;line ... marker-end="url(#ah-ink)"/&gt;</code></td>
+        <td>Flujo lineal simple A → B.</td>
+      </tr>
+      <tr>
+        <td class="mono">AR-03</td>
+        <td><code>&lt;path d="M x y L x y L x y L x y" ... /&gt;</code></td>
+        <td>Cuando los elementos no están alineados.</td>
+      </tr>
+      <tr>
+        <td class="mono">AR-04</td>
+        <td><code>&lt;path d="M x y C cx cy, cx cy, x y" ... /&gt;</code></td>
+        <td>Conectores orgánicos entre nodos distantes.</td>
+      </tr>
+      <tr>
+        <td class="mono">AR-06</td>
+        <td><code>stroke="#F5C518"</code> + <code>marker-end="url(#ah-y)"</code></td>
+        <td>La flecha que <em>lleva</em> el concepto clave.</td>
+      </tr>
+      <tr>
+        <td class="mono">AR-07</td>
+        <td><code>stroke-dasharray="6 4"</code> + <code>#E11D2E</code></td>
+        <td>Error, drop, conexión rota.</td>
+      </tr>
+      <tr>
+        <td class="mono">AR-08</td>
+        <td><code>stroke-dasharray: 4 6; animation: dashMove 1.6s linear infinite;</code></td>
+        <td>Cuando hay que sugerir movimiento continuo.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

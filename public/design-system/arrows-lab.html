@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Auto Animator — Arrows Lab</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../tokens.css">
+<style>
+  body { background: #0A0A0A; color: #F5F5F5; }
+  .aa-nav { background: rgba(10,10,10,.72); border-bottom: 1px solid #1f1f1f; }
+  .aa-nav a { color: #A0A0A0; }
+  .aa-nav a:hover { background: #141414; color: #fff; }
+  .aa-nav a.active { background: #F5C518; color: #0A0A0A; }
+
+  .lab-shell {
+    max-width: 1400px; margin: 0 auto; padding: 56px 48px 120px;
+  }
+  .eyebrow-d {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    color: #7a7a7a;
+  }
+  h1.title {
+    font-size: clamp(48px, 7vw, 80px);
+    font-weight: 600; letter-spacing: -0.035em; line-height: 1;
+    margin: 12px 0 18px;
+  }
+  h1.title .y { background: #F5C518; color: #0A0A0A; padding: 0 12px; border-radius: 8px; }
+  .lead-d { color: #B5B5B5; font-size: 18px; max-width: 66ch; line-height: 1.5; }
+
+  .h2-d {
+    font-size: 28px; font-weight: 600; letter-spacing: -0.02em;
+    margin: 80px 0 20px; padding-top: 28px;
+    border-top: 1px solid #1f1f1f; color: #fff;
+  }
+
+  /* ---------- Board ---------- */
+  .board-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-top: 24px;
+  }
+  .board {
+    position: relative;
+    border: 1px solid #1f1f1f;
+    border-radius: 16px;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(245,197,24,.04), transparent 60%),
+      #0d0d0d;
+    aspect-ratio: 16/10;
+    min-height: 480px;
+    overflow: hidden;
+    user-select: none;
+  }
+  @media (max-width: 1100px) {
+    .board-grid { grid-template-columns: 1fr !important; }
+  }
+  .board .chrome-btn {
+    position: absolute; z-index: 6;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 12px;
+    border: 1px solid #2b2b2b; border-radius: 6px;
+    background: rgba(20,20,20,.6);
+    font-family: var(--font-mono); font-size: 10.5px;
+    letter-spacing: .12em; text-transform: uppercase; color: #bbb;
+    backdrop-filter: blur(6px); cursor: default;
+  }
+  .board .chrome-btn:hover { color: #fff; border-color: #444; }
+  .board .tag-tl { top: 18px; left: 18px; }
+  .board .tag-tr { top: 18px; right: 18px; cursor: pointer; }
+  .board .tag-bl {
+    bottom: 18px; left: 18px;
+    border: 0; background: transparent; color: #5a5a5a;
+    padding: 0;
+  }
+  .board .tag-br { bottom: 18px; right: 18px; cursor: pointer; }
+
+  .board-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  /* Node */
+  .node {
+    position: absolute; z-index: 3;
+    padding: 14px 22px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #1a1a1a, #0f0f0f);
+    border: 1px solid #2a2a2a;
+    color: #E8E8E8;
+    font-family: var(--font-sans); font-size: 14px; font-weight: 500;
+    letter-spacing: -0.005em;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 2px 10px rgba(0,0,0,.4);
+    transition: border-color 220ms var(--ease-out), transform 220ms var(--ease-out);
+  }
+  .node:hover { border-color: #F5C518; transform: translateY(-1px); }
+  .node.lit { border-color: #F5C518; }
+
+  /* Entry left */
+  .node.entry {
+    left: 10%; top: 50%; transform: translateY(-50%);
+    min-width: 120px; text-align: center;
+  }
+  /* Three targets on the right */
+  .node.target { right: 10%; min-width: 140px; text-align: center; }
+  .node.upper  { top: 30%; transform: translateY(-50%); }
+  .node.middle { top: 50%; transform: translateY(-50%); }
+  .node.lower  { top: 70%; transform: translateY(-50%); }
+
+  /* Port dots on nodes */
+  .port {
+    position: absolute; width: 9px; height: 9px; border-radius: 50%;
+    background: #0d0d0d; border: 1.2px solid #5a5a5a;
+  }
+  .node.entry .port { right: -5px; }
+  .node.entry .port.p1 { top: 30%; }
+  .node.entry .port.p2 { top: 50%; transform: translateY(-50%); }
+  .node.entry .port.p3 { bottom: 30%; }
+
+  .node.target .port { left: -5px; top: 50%; transform: translateY(-50%); }
+  .node.target:hover .port, .node.target.lit .port { background: #F5C518; border-color: #F5C518; }
+
+  /* Diamond handle — ELBOW/FLOW */
+  .diamond {
+    position: absolute; z-index: 4;
+    width: 14px; height: 14px;
+    background: #F5C518;
+    transform: rotate(45deg);
+    box-shadow: 0 0 0 2px rgba(245,197,24,.2);
+    cursor: grab;
+    transition: transform 220ms var(--ease-out), box-shadow 220ms var(--ease-out);
+  }
+  .diamond:hover {
+    transform: rotate(45deg) scale(1.15);
+    box-shadow: 0 0 0 4px rgba(245,197,24,.22);
+  }
+  .diamond.ghost { background: transparent; border: 1.5px solid #F5C518; box-shadow: none; }
+
+  /* Hint */
+  .hint {
+    position: absolute; bottom: 22px; left: 22px;
+    font-family: var(--font-mono); font-size: 10.5px;
+    color: #5a5a5a; letter-spacing: .1em; text-transform: uppercase;
+  }
+
+  /* SVG stroke styles */
+  .ln       { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .ln.track { stroke: #1f1f1f; stroke-width: 1.2; }
+  .ln.y     { stroke: #F5C518; stroke-width: 2; }
+  .ln.y-soft{ stroke: #F5C518; stroke-width: 2; opacity: .55; }
+  .ln.w     { stroke: #E8E8E8; stroke-width: 2; }
+  .ln.dash  { stroke-dasharray: 10 6; }
+  .ln.dash-sm { stroke-dasharray: 5 5; }
+
+  /* Animated flow dashes */
+  .flow-anim {
+    stroke-dasharray: 4 8;
+    animation: flowDash 1.8s linear infinite;
+  }
+  @keyframes flowDash { to { stroke-dashoffset: -24; } }
+
+  /* Gesture arrows (curve) */
+  .gesture {
+    fill: none; stroke: #F5C518; stroke-width: 3.5; stroke-linecap: round;
+  }
+  .gesture.middle { stroke: #fff; opacity: .82; }
+  .gesture.soft { opacity: .85; }
+
+  /* Data-flow rail blobs */
+  .rail-dot {
+    fill: #F5C518;
+    filter: drop-shadow(0 0 6px rgba(245,197,24,.55));
+  }
+
+  /* Draw-in animation — JS sets --len on each path; we animate a single pattern that fits */
+  .draw-path {
+    stroke-dasharray: var(--len) var(--len);
+    stroke-dashoffset: var(--len);
+    animation: drawIn 3.2s cubic-bezier(.2,.7,.2,1) infinite;
+  }
+  .draw-path.d2 { animation-delay: .25s; }
+  .draw-path.d3 { animation-delay: .5s; }
+  @keyframes drawIn {
+    0%   { stroke-dashoffset: var(--len); }
+    40%  { stroke-dashoffset: 0; }
+    80%  { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: var(--len); }
+  }
+
+  /* Legend / table */
+  .legend {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    margin-top: 30px;
+  }
+  .legend .l-card {
+    border: 1px solid #1f1f1f; border-radius: 12px; padding: 20px;
+    background: #0d0d0d;
+  }
+  .legend .l-card .mini {
+    height: 44px; margin-bottom: 12px;
+    display: flex; align-items: center;
+  }
+  .legend .l-card h4 {
+    margin: 0 0 4px; font-size: 14px; font-weight: 600; color: #fff;
+    letter-spacing: -0.01em;
+  }
+  .legend .l-card p { margin: 0; color: #8a8a8a; font-size: 12px; line-height: 1.5; }
+  .legend .l-card .id {
+    font-family: var(--font-mono); font-size: 10px; color: #5a5a5a;
+    letter-spacing: .1em; text-transform: uppercase; margin-bottom: 10px;
+  }
+
+  /* Code */
+  .code {
+    background: #0d0d0d; border: 1px solid #1f1f1f; border-radius: 10px;
+    padding: 16px 18px; font-family: var(--font-mono); font-size: 12px;
+    color: #c5c5c5; white-space: pre; overflow-x: auto; margin-top: 14px;
+  }
+  .code .c-k { color: #F5C518; }
+  .code .c-c { color: #5a5a5a; }
+
+  /* Utility pill row */
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .pill-d {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: .1em; text-transform: uppercase;
+    padding: 4px 8px; border-radius: 4px;
+    background: #1a1a1a; border: 1px solid #2a2a2a; color: #bbb;
+  }
+  .pill-d.y { background: #F5C518; color: #0A0A0A; border-color: #F5C518; }
+</style>
+</head>
+<body data-screen-label="04b Arrows Lab">
+
+<nav class="aa-nav">
+  <div class="brand" style="color:#fff;">
+    <div class="dot" style="background:#fff;"></div>
+    <div class="dot y"></div><div class="dot r"></div>
+    <span>Auto&nbsp;Animator</span>
+  </div>
+  <div class="spacer"></div>
+  <ul>
+    <li><a href="index.html">Inicio</a></li>
+    <li><a href="colors.html">Colores</a></li>
+    <li><a href="typography.html">Tipografía</a></li>
+    <li><a href="backgrounds.html">Fondos</a></li>
+    <li><a href="arrows.html">Flechas</a></li>
+    <li><a href="arrows-lab.html" class="active">Lab</a></li>
+    <li><a href="animations.html">Animaciones</a></li>
+    <li><a href="guidelines.html">Buenas prácticas</a></li>
+  </ul>
+</nav>
+
+<div class="lab-shell">
+  <div class="eyebrow-d">04b · Arrows Lab</div>
+  <h1 class="title">Cuatro familias de <span class="y">conectores</span>.</h1>
+  <p class="lead-d">Cuatro tableros comparables: una entrada, tres objetivos, la misma topología. Cambia sólo el lenguaje del conector — elbow, curve, data-flow o callout — para ver cuál comunica mejor cada situación.</p>
+
+  <h2 class="h2-d">Tableros</h2>
+  <div class="board-grid">
+
+    <!-- ========== 01 ELBOW / FLOW ========== -->
+    <div class="board" id="board-elbow">
+      <button class="chrome-btn tag-tl">Elbow · Flow</button>
+      <button class="chrome-btn tag-tr">Expand</button>
+      <button class="chrome-btn tag-br" onclick="resetBoard('elbow')">Reset</button>
+      <span class="hint">Click diamonds to reroute</span>
+
+      <svg class="board-svg" viewBox="0 0 1600 900" preserveAspectRatio="none">
+        <!-- Tracks (idle lines under the flow) -->
+        <path class="ln track" d="M 397 441 H 880 V 271 H 1155"/>
+        <path class="ln track" d="M 397 450 H 1155"/>
+        <path class="ln track" d="M 397 459 H 880 V 629 H 1155"/>
+
+        <!-- Active flow lines -->
+        <path class="ln y flow-anim" d="M 397 441 H 880 V 271 H 1155"/>
+        <path class="ln y flow-anim" style="animation-delay:.3s" d="M 397 450 H 1155"/>
+        <path class="ln y flow-anim" style="animation-delay:.6s" d="M 397 459 H 880 V 629 H 1155"/>
+      </svg>
+
+      <!-- Diamond handles at elbow points (at 880/1600 = 55%) -->
+      <div class="diamond" style="left: 55%; top: 30.1%;"></div>
+      <div class="diamond" style="left: 55%; top: 50%;"></div>
+      <div class="diamond" style="left: 55%; top: 69.9%;"></div>
+
+      <!-- Nodes -->
+      <div class="node entry">Entry
+        <span class="port p1"></span>
+        <span class="port p2"></span>
+        <span class="port p3"></span>
+      </div>
+      <div class="node target upper"><span class="port"></span>Upper target</div>
+      <div class="node target middle"><span class="port"></span>Middle target</div>
+      <div class="node target lower"><span class="port"></span>Lower target</div>
+    </div>
+
+    <!-- ========== 02 CURVE / GESTURE ========== -->
+    <div class="board" id="board-curve">
+      <button class="chrome-btn tag-tl">Curve · Gesture</button>
+      <button class="chrome-btn tag-tr">Expand</button>
+      <button class="chrome-btn tag-br" onclick="replayCurve()">Replay</button>
+      <span class="hint">Handwritten-style vectors</span>
+
+      <svg class="board-svg" viewBox="0 0 1600 900" preserveAspectRatio="none">
+        <defs>
+          <marker id="ah-curve" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#F5C518"/>
+          </marker>
+          <marker id="ah-curve-w" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#FFFFFF"/>
+          </marker>
+        </defs>
+
+        <!-- three gestural curves -->
+        <!-- Curves start exactly at the 3 Entry ports (x=397, y=441/450/459) and end at target ports (x=1155) -->
+        <path id="curve-up"  class="gesture soft draw-path"      d="M 397 441 C 580 441, 780 330, 1148 278" marker-end="url(#ah-curve)"/>
+        <path id="curve-mid" class="gesture middle draw-path d2" d="M 397 450 C 620 450, 900 450, 1148 450" marker-end="url(#ah-curve-w)"/>
+        <path id="curve-low" class="gesture soft draw-path d3"   d="M 397 459 C 580 459, 780 575, 1148 622" marker-end="url(#ah-curve)"/>
+      </svg>
+
+      <div class="node entry">Entry
+        <span class="port p1"></span>
+        <span class="port p2"></span>
+        <span class="port p3"></span>
+      </div>
+      <div class="node target upper"><span class="port"></span>Upper target</div>
+      <div class="node target middle lit"><span class="port"></span>Middle target</div>
+      <div class="node target lower"><span class="port"></span>Lower target</div>
+    </div>
+
+    <!-- ========== 03 DATA RAIL ========== -->
+    <div class="board" id="board-rail">
+      <button class="chrome-btn tag-tl">Data · Rail</button>
+      <button class="chrome-btn tag-tr">Expand</button>
+      <button class="chrome-btn tag-br">Reset</button>
+      <span class="hint">Track + moving pulses</span>
+
+      <svg class="board-svg" viewBox="0 0 1600 900" preserveAspectRatio="none">
+        <!-- rails -->
+        <!-- Rails from Entry ports (x=397) to just BEFORE target ports (x=1135 — leaves room for arrival diamond) -->
+        <path id="rail-up"  class="ln y-soft" d="M 397 441 C 560 441, 620 441, 720 271 L 1135 271"/>
+        <path id="rail-mid" class="ln y-soft" d="M 397 450 L 1135 450"/>
+        <path id="rail-low" class="ln y-soft" d="M 397 459 C 560 459, 620 459, 720 629 L 1135 629"/>
+
+        <!-- moving pulse dots on rails -->
+        <circle class="rail-dot" r="5">
+          <animateMotion dur="2.6s" repeatCount="indefinite" rotate="auto">
+            <mpath href="#rail-up"/>
+          </animateMotion>
+        </circle>
+        <circle class="rail-dot" r="5">
+          <animateMotion dur="2.2s" repeatCount="indefinite" rotate="auto" begin="0.5s">
+            <mpath href="#rail-mid"/>
+          </animateMotion>
+        </circle>
+        <circle class="rail-dot" r="5">
+          <animateMotion dur="2.8s" repeatCount="indefinite" rotate="auto" begin="1s">
+            <mpath href="#rail-low"/>
+          </animateMotion>
+        </circle>
+      </svg>
+
+      <!-- Diamond arrival markers — placed at end of rail (x=1135/1600 ≈ 70.9%), NOT on top of the target -->
+      <div class="diamond" style="left: 70.9%; top: 30.1%;"></div>
+      <div class="diamond" style="left: 70.9%; top: 50%;"></div>
+      <div class="diamond" style="left: 70.9%; top: 69.9%;"></div>
+
+      <div class="node entry">Entry
+        <span class="port p1"></span>
+        <span class="port p2"></span>
+        <span class="port p3"></span>
+      </div>
+      <div class="node target upper"><span class="port"></span>Upper target</div>
+      <div class="node target middle"><span class="port"></span>Middle target</div>
+      <div class="node target lower"><span class="port"></span>Lower target</div>
+    </div>
+
+    <!-- ========== 04 LINE / CALLOUT ========== -->
+    <div class="board" id="board-callout">
+      <button class="chrome-btn tag-tl">Line · Callout</button>
+      <button class="chrome-btn tag-tr">Expand</button>
+      <button class="chrome-btn tag-br">Reset</button>
+      <span class="hint">Dashed · diagrammatic</span>
+
+      <svg class="board-svg" viewBox="0 0 1600 900" preserveAspectRatio="none">
+        <defs>
+          <marker id="ah-white" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#E8E8E8"/>
+          </marker>
+        </defs>
+        <!-- Dashed callouts from Entry ports to target ports — ends at x=1148 so arrowhead sits exactly at the port circle -->
+        <path class="ln w draw-path"    d="M 397 441 L 1148 278" marker-end="url(#ah-white)"/>
+        <path class="ln w draw-path d2" d="M 397 450 L 1148 450" marker-end="url(#ah-white)"/>
+        <path class="ln w draw-path d3" d="M 397 459 L 1148 622" marker-end="url(#ah-white)"/>
+      </svg>
+
+      <div class="node entry">Entry
+        <span class="port p1"></span>
+        <span class="port p2"></span>
+        <span class="port p3"></span>
+      </div>
+      <div class="node target upper"><span class="port"></span>Upper target</div>
+      <div class="node target middle"><span class="port"></span>Middle target</div>
+      <div class="node target lower"><span class="port"></span>Lower target</div>
+    </div>
+
+  </div>
+
+  <!-- ========== Legend ========== -->
+  <h2 class="h2-d">Cuándo usar cada estilo</h2>
+  <div class="legend">
+    <div class="l-card">
+      <div class="id">AR-LAB-01 · ELBOW</div>
+      <div class="mini">
+        <svg viewBox="0 0 160 44" width="100%" height="44">
+          <path class="ln y" d="M 8 32 H 70 V 12 H 152" stroke-width="2"/>
+        </svg>
+      </div>
+      <h4>Elbow / Flow</h4>
+      <p>Lo más legible para jerarquías y pipelines en grid. Las curvas de 90° nunca se cruzan en diagonal.</p>
+      <div class="pill-row"><span class="pill-d">pipeline</span><span class="pill-d">layout</span></div>
+    </div>
+
+    <div class="l-card">
+      <div class="id">AR-LAB-02 · CURVE</div>
+      <div class="mini">
+        <svg viewBox="0 0 160 44" width="100%" height="44">
+          <path class="gesture" d="M 8 36 C 50 36, 90 8, 148 14" stroke-width="3"/>
+        </svg>
+      </div>
+      <h4>Curve / Gesture</h4>
+      <p>Vector dibujado a mano — comunica intención y narrativa. Perfecto para historias y explicaciones.</p>
+      <div class="pill-row"><span class="pill-d y">story</span><span class="pill-d">onboarding</span></div>
+    </div>
+
+    <div class="l-card">
+      <div class="id">AR-LAB-03 · RAIL</div>
+      <div class="mini">
+        <svg viewBox="0 0 160 44" width="100%" height="44">
+          <path class="ln y-soft" d="M 8 22 H 152" stroke-width="2"/>
+          <circle r="4" fill="#F5C518">
+            <animateMotion dur="2s" repeatCount="indefinite" path="M 8 22 H 152"/>
+          </circle>
+        </svg>
+      </div>
+      <h4>Data rail</h4>
+      <p>Riel fijo + pulsos en movimiento. Usa cuando quieras sugerir flujo continuo de datos o eventos.</p>
+      <div class="pill-row"><span class="pill-d">streaming</span><span class="pill-d">live</span></div>
+    </div>
+
+    <div class="l-card">
+      <div class="id">AR-LAB-04 · CALLOUT</div>
+      <div class="mini">
+        <svg viewBox="0 0 160 44" width="100%" height="44">
+          <path class="ln w dash-sm" d="M 8 34 L 152 10" stroke-width="1.5" marker-end="url(#ah-white-mini)"/>
+          <defs>
+            <marker id="ah-white-mini" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 Z" fill="#E8E8E8"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <h4>Line / Callout</h4>
+      <p>Punteada y fina — señala referencias, anotaciones, relaciones débiles. Baja jerarquía.</p>
+      <div class="pill-row"><span class="pill-d">annotation</span><span class="pill-d">reference</span></div>
+    </div>
+  </div>
+
+  <!-- ========== Snippets ========== -->
+  <h2 class="h2-d">Snippets base</h2>
+  <div class="code"><span class="c-c">/* Elbow con flujo animado */</span>
+.ln.flow-anim {
+  stroke: <span class="c-k">#F5C518</span>;
+  stroke-width: 2;
+  stroke-dasharray: 4 8;
+  animation: flowDash 1.8s linear infinite;
+}
+@keyframes flowDash { to { stroke-dashoffset: -24; } }
+
+<span class="c-c">/* Curve gestural */</span>
+.gesture {
+  fill: none; stroke: <span class="c-k">#F5C518</span>;
+  stroke-width: 3.5; stroke-linecap: round;
+}
+
+<span class="c-c">/* Rail — pulso que viaja sobre el path */</span>
+&lt;path id="rail" class="ln y-soft" d="..." /&gt;
+&lt;circle r="5" fill="<span class="c-k">#F5C518</span>"&gt;
+  &lt;animateMotion dur="2.2s" repeatCount="indefinite"&gt;
+    &lt;mpath href="#rail"/&gt;
+  &lt;/animateMotion&gt;
+&lt;/circle&gt;
+
+<span class="c-c">/* Callout */</span>
+.ln.dash { stroke-dasharray: 10 6; }</div>
+
+  <p style="margin-top: 64px; font-family: var(--font-mono); font-size: 11px; color:#5a5a5a; letter-spacing:.08em; text-transform:uppercase;">
+    ← Vuelve a <a href="arrows.html" style="color:#bbb;">Flechas básicas</a> · o entra al <a href="animations.html" style="color:#bbb;">Módulo de animaciones</a>
+  </p>
+</div>
+
+<script>
+  // Measure each .draw-path and set --len so the CSS dasharray animation fits its true length
+  function initDrawPaths(){
+    document.querySelectorAll('.draw-path').forEach(p => {
+      try {
+        const len = p.getTotalLength();
+        p.style.setProperty('--len', len);
+      } catch(e) { /* ignore */ }
+    });
+  }
+  if (document.readyState !== 'loading') initDrawPaths();
+  else document.addEventListener('DOMContentLoaded', initDrawPaths);
+
+  function replayCurve() {
+    ['curve-up','curve-mid','curve-low'].forEach((id, i) => {
+      const el = document.getElementById(id);
+      el.style.animation = 'none';
+      void el.getBoundingClientRect();
+      el.style.animation = '';
+    });
+  }
+  function resetBoard(id) {
+    const el = document.getElementById('board-' + id);
+    el.classList.remove('flash');
+    void el.offsetWidth;
+    el.classList.add('flash');
+    // Re-measure (in case fonts/layout shifted)
+    el.querySelectorAll('.draw-path').forEach(p => {
+      try { p.style.setProperty('--len', p.getTotalLength()); } catch(e){}
+      p.style.animation = 'none';
+      void p.getBoundingClientRect();
+      p.style.animation = '';
+    });
+  }
+</script>
+</body>
+</html>
